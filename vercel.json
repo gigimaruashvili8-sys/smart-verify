@@ -1,1 +1,4 @@
-{ "rewrites": [ { "source": "/((?!api/).*)", "destination": "/index.html" } ] }
+{
+  "functions": { "api/send-verification-email.js": { "includeFiles": "api/_fonts/**" } },
+  "rewrites": [ { "source": "/((?!api/).*)", "destination": "/index.html" } ]
+}

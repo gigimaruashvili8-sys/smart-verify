@@ -85,3 +85,16 @@ create policy owner_read_docs on storage.objects
   using (bucket_id = 'verification-docs' and public.owns_verification((storage.foldername(name))[1]));
 -- No anon select/update/delete policies exist => insert-only for guests.
 -- Tip: Auth > Providers > Email: disable "Confirm email" so sign-up creates a session immediately.
+
+-- Owners may write generated PDFs (agreement/invoice) into their own verification folders.
+drop policy if exists owner_insert_docs on storage.objects;
+create policy owner_insert_docs on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'verification-docs' and public.owns_verification((storage.foldername(name))[1]));
+
+drop policy if exists owner_update_docs on storage.objects;
+create policy owner_update_docs on storage.objects
+  for update to authenticated
+  using (bucket_id = 'verification-docs' and public.owns_verification((storage.foldername(name))[1]))
+  with check (bucket_id = 'verification-docs' and public.owns_verification((storage.foldername(name))[1]));
+-- PDFs are shared with the guest via 30-day signed URLs; the bucket stays private.
