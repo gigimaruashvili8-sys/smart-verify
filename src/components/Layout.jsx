@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { DEMO, supabase } from '../lib/supabase'
 
 const link = ({ isActive }) =>
   `px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`
@@ -22,6 +22,7 @@ export default function Layout() {
           <button onClick={logout} className="ml-auto text-sm text-slate-400 hover:text-white">Log out</button>
         </div>
       </header>
+      {DEMO && <p className="bg-blue-600/20 text-blue-200 text-sm text-center py-2">Demo mode: sample data, nothing is saved or emailed.</p>}
       <main className="max-w-7xl mx-auto px-4 py-8"><Outlet /></main>
     </div>
   )

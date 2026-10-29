@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { Link } from 'react-router-dom'
+import { DEMO, supabase } from '../lib/supabase'
 import { isActive, useVerifications } from '../lib/useVerifications'
 import { BTN, BTN_GHOST, CARD, FIELD, GRID2, INPUT, STATUS_STYLE } from '../lib/ui'
 
@@ -44,6 +45,7 @@ export default function Dashboard() {
     const { data: { session } } = await supabase.auth.getSession()
     const { error } = await supabase.from('verifications').update({ status: 'verified' }).eq('id', r.id)
     if (error) { setBusyId(null); return setMsg('Could not update the record.') }
+    if (DEMO) { setMsg(`Demo: the agreement and invoice would now be emailed to ${r.guest_email || 'the guest'}.`); setBusyId(null); reload(); return }
     const res = await fetch('/api/send-verification-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
@@ -92,6 +94,7 @@ export default function Dashboard() {
             <div className={FIELD}>
               <label className="text-sm text-slate-300">Send this link to your guest</label>
               <input readOnly className={INPUT} value={link} onFocus={(e) => e.target.select()} />
+              <Link className={`${BTN_GHOST} text-center`} to={link.slice(window.location.origin.length)}>Open guest page</Link>
             </div>
           )}
         </form>
@@ -111,6 +114,9 @@ export default function Dashboard() {
                 <td className="pr-4"><span className={`px-2.5 py-1 rounded-full text-xs ${STATUS_STYLE[r.status]}`}>{r.status}</span></td>
                 <td className="pr-4">{r.property_unit}</td>
                 <td>
+                  {r.status === 'awaiting_guest' && (
+                    <Link className="text-blue-400 hover:underline" to={`/verify/${r.id}`}>Open guest page</Link>
+                  )}
                   {r.status === 'pending_approval' && (
                     <div className="flex flex-wrap gap-2">
                       <button className={BTN} disabled={busyId === r.id} onClick={() => approve(r)}>✅ დადასტურება და მეილზე გაგზავნა</button>
