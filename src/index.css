@@ -1,5 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-body { font-family: 'Noto Sans Georgian', ui-sans-serif, system-ui, sans-serif; }
+body {
+  font-family: 'Noto Sans Georgian', ui-sans-serif, system-ui, sans-serif;
+  background:
+    radial-gradient(900px 520px at 8% -10%, rgba(59,130,246,.20), transparent 60%),
+    radial-gradient(700px 480px at 100% 0%, rgba(139,92,246,.15), transparent 55%),
+    radial-gradient(600px 400px at 50% 110%, rgba(16,185,129,.07), transparent 60%),
+    #020617;
+  background-attachment: fixed;
+}
+::selection { background: rgba(59,130,246,.4); }
 :root { color-scheme: dark; box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }

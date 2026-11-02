@@ -48,7 +48,7 @@ export default function Calendar() {
             const here = bookings.filter((b) => b.check_in <= key && key <= b.check_out)
             const dim = view === 'month' && d.getMonth() !== anchor.getMonth()
             return (
-              <div key={key} className={`min-h-[90px] rounded-xl border border-slate-800 p-1.5 ${dim ? 'opacity-40' : ''}`}>
+              <div key={key} className={`min-h-[90px] rounded-xl border ${key === iso(new Date()) ? 'border-blue-500 bg-blue-500/10' : 'border-slate-800'} p-1.5 ${dim ? 'opacity-40' : ''}`}>
                 <div className="text-xs text-slate-400">{d.getDate()}</div>
                 {here.map((b) => {
                   const tag = b.check_in === key ? 'Check-in' : b.check_out === key ? 'Check-out' : 'Staying'

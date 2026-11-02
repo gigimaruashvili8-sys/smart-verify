@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { BTN, BTN_GHOST, CARD, FIELD, GRID2, INPUT } from '../lib/ui'
+import { CheckCircle2, Lock } from 'lucide-react'
+import Logo from '../components/Logo.jsx'
+import { BTN, BTN_GHOST, CARD, FIELD, GRID2, INPUT, LABEL } from '../lib/ui'
 
 const BUCKET = 'verification-docs'
 
@@ -34,6 +36,38 @@ function SignaturePad({ canvasRef, onChange }) {
         className="w-full bg-slate-800/80 border border-slate-700 rounded-xl touch-none"
         onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={up} />
       <button type="button" onClick={clear} className={BTN_GHOST}>Clear</button>
+    </div>
+  )
+}
+
+function Shell({ children }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center p-4">
+      <div className="py-6"><Logo /></div>
+      <div className={`${CARD} w-full max-w-xl`}>{children}</div>
+      <p className="mt-6 flex items-center gap-2 text-xs text-slate-500"><Lock className="h-3.5 w-3.5" />Your documents are encrypted and visible only to the property owner.</p>
+    </div>
+  )
+}
+
+function Stepper({ step }) {
+  const items = ['Details', 'Documents', 'Signature']
+  return (
+    <div className="flex items-center">
+      {items.map((t, i) => {
+        const n = i + 1, done = step > n, now = step === n
+        return (
+          <div key={t} className="flex items-center flex-1 last:flex-none">
+            <div className="flex items-center gap-2">
+              <span className={`h-8 w-8 rounded-full grid place-items-center text-sm font-semibold transition-all ${done ? 'bg-emerald-500 text-white' : now ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white ring-4 ring-blue-500/20' : 'bg-slate-800 text-slate-500 border border-slate-700'}`}>
+                {done ? '✓' : n}
+              </span>
+              <span className={`text-sm hidden sm:block ${now ? 'text-white font-medium' : 'text-slate-500'}`}>{t}</span>
+            </div>
+            {i < 2 && <div className={`h-px flex-1 mx-3 ${done ? 'bg-emerald-500/60' : 'bg-slate-700'}`} />}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -100,39 +134,40 @@ export default function Verify() {
     setBusy(false)
   }
 
-  const Shell = ({ children }) => (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-      <div className={`${CARD} w-full max-w-xl`}>{children}</div>
-    </div>
-  )
-
   if (state === 'loading') return <Shell><p className="text-slate-400">Loading…</p></Shell>
   if (state === 'unavailable') return <Shell><p>This verification link is invalid or has expired.</p></Shell>
   if (state === 'done') return (
-    <Shell><p className="text-xl text-center py-8">ვერიფიკაცია წარმატებით გაიგზავნა! გმადლობთ.</p></Shell>
+    <Shell>
+      <div className="flex flex-col items-center gap-4 py-8 text-center">
+        <span className="h-16 w-16 rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/40 grid place-items-center"><CheckCircle2 className="h-8 w-8 text-emerald-400" /></span>
+        <p className="text-xl font-semibold">ვერიფიკაცია წარმატებით გაიგზავნა! გმადლობთ.</p>
+      </div>
+    </Shell>
   )
 
   return (
     <Shell>
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="text-xl font-bold">Guest verification · {rec.property_unit}</h1>
-          <p className="text-sm text-slate-400">Step {step} of 3</p>
+          <h1 className="text-xl font-bold tracking-tight">Guest verification</h1>
+          <p className="text-sm text-slate-400 mt-1">{rec.property_unit} · Step {step} of 3</p>
         </div>
+
+        <Stepper step={step} />
 
         {step === 1 && (
           <div className="flex flex-col gap-4">
-            <div className={FIELD}><label className="text-sm text-slate-300">Full name</label>
+            <div className={FIELD}><label className={LABEL}>Full name</label>
               <input className={INPUT} value={f.name} onChange={set('name')} /></div>
-            <div className={FIELD}><label className="text-sm text-slate-300">Personal ID number (11 digits)</label>
+            <div className={FIELD}><label className={LABEL}>Personal ID number (11 digits)</label>
               <input className={INPUT} inputMode="numeric" maxLength={11} value={f.pid}
                 onChange={(e) => setF({ ...f, pid: e.target.value.replace(/\D/g, '') })} /></div>
-            <div className={FIELD}><label className="text-sm text-slate-300">Phone number</label>
+            <div className={FIELD}><label className={LABEL}>Phone number</label>
               <input className={INPUT} type="tel" value={f.phone} onChange={set('phone')} /></div>
             <div className={GRID2}>
-              <div className={FIELD}><label className="text-sm text-slate-300">Check-in</label>
+              <div className={FIELD}><label className={LABEL}>Check-in</label>
                 <input className={INPUT} type="date" value={f.in} onChange={set('in')} /></div>
-              <div className={FIELD}><label className="text-sm text-slate-300">Check-out</label>
+              <div className={FIELD}><label className={LABEL}>Check-out</label>
                 <input className={INPUT} type="date" value={f.out} onChange={set('out')} /></div>
             </div>
           </div>
@@ -142,7 +177,7 @@ export default function Verify() {
           <div className={GRID2}>
             {[['Front of ID card / passport', setFront, front], ['Back of ID card / passport', setBack, back]].map(([label, setter, file]) => (
               <div key={label} className={FIELD}>
-                <label className="text-sm text-slate-300">{label}</label>
+                <label className={LABEL}>{label}</label>
                 <input className={INPUT} type="file" accept="image/*" capture="environment"
                   onChange={(e) => setter(e.target.files?.[0] || null)} />
                 {file && <img alt="" src={URL.createObjectURL(file)} className="rounded-xl max-h-40 object-cover" />}
@@ -153,7 +188,7 @@ export default function Verify() {
 
         {step === 3 && <SignaturePad canvasRef={canvasRef} onChange={setSigned} />}
 
-        {err && <p className="text-rose-300 text-sm">{err}</p>}
+        {err && <p className="text-sm rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-200 px-4 py-3">{err}</p>}
 
         <div className="flex gap-3">
           {step > 1 && <button className={BTN_GHOST} onClick={() => setStep(step - 1)}>Back</button>}
